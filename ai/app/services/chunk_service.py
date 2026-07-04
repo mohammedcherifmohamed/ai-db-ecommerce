@@ -1,0 +1,49 @@
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from app.models.chunk import chunk
+
+
+class ChunkService:
+
+    def __init__(
+        self,
+        chunk_size: int = 1000,
+        chunk_overlap: int = 200,
+    ):
+        self.splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            separators=[
+                "\n\n",
+                "\n",
+                ". ",
+                "? ",
+                "! ",
+                " ",
+                "",
+            ],
+        )
+
+    def split_page(
+        self,
+        *,
+        document_id: int,
+        page: int,
+        text: str,
+    ) -> list[chunk]:
+
+        pieces = self.splitter.split_text(text)
+
+        chunks = []
+
+        for index, piece in enumerate(pieces):
+            chunks.append(
+                chunk(
+                    document_id=document_id,
+                    page=page,
+                    chunk_index=index,
+                    text=piece,
+                )
+            )
+
+        return chunks
